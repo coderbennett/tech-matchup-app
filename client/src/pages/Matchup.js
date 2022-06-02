@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAllTech, createMatchup } from '../utils/api';
+import { QUERY_TECHS } from '../utils/queries';
+import { ADD_MATCHUP }  from '../utils/mutations'
+import { useQuery, useMutation } from '@apollo/client';
 
 const Matchup = () => {
   const [techList, setTechList] = useState([]);
@@ -13,11 +15,13 @@ const Matchup = () => {
   useEffect(() => {
     const getTechList = async () => {
       try {
-        const res = await getAllTech();
-        if (!res.ok) {
-          throw new Error('No list of technologies');
-        }
-        const techList = await res.json();
+        const { loading, data } = useQuery(QUERY_TECHS);
+        const techList = data?.techs || []
+        // const res = await getAllTech();
+        // if (!res.ok) {
+        //   throw new Error('No list of technologies');
+        // }
+        // const techList = await res.json();
         setTechList(techList);
       } catch (err) {
         console.error(err);
@@ -33,16 +37,19 @@ const Matchup = () => {
 
   const handleFormSubmit = async (event) => {
     event.preventDefault();
-
+ const [addMatchup, {err, data}] = useMutation(ADD_MATCHUP);
     try {
-      const res = await createMatchup(formData);
+     const {data} = await addMatchup({
+       variables: {...formData}
+     })
+      // const res = await createMatchup(formData);
 
-      if (!res.ok) {
-        throw new Error('something went wrong!');
-      }
+      // if (!res.ok) {
+      //   throw new Error('something went wrong!');
+      // }
 
-      const matchup = await res.json();
-      console.log(matchup);
+      // const matchup = await res.json();
+      // console.log(matchup);
       navigate(`/matchup/${matchup._id}`);
     } catch (err) {
       console.error(err);
