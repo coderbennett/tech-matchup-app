@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllMatchups } from '../utils/api';
+import { QUERY_MATCHUPS } from '../utils/queries';
+import { useQuery } from '@apollo/client';
 
 const Home = () => {
   const [matchupList, setMatchupList] = useState([]);
@@ -8,12 +9,17 @@ const Home = () => {
   useEffect(() => {
     const getMatchupList = async () => {
       try {
-        const res = await getAllMatchups();
-        if (!res.ok) {
-          throw new Error('No list of matchups');
-        }
-        const matchupList = await res.json();
-        setMatchupList(matchupList);
+        const { loading, data } = useQuery(QUERY_MATCHUPS);
+        const matchups = data?.matchups || []
+
+
+
+        // const res = await getAllMatchups();
+        // if (!res.ok) {
+        //   throw new Error('No list of matchups');
+        // }
+        // const matchupList = await res.json();
+        setMatchupList(matchups);
       } catch (err) {
         console.error(err);
       }
@@ -29,7 +35,7 @@ const Home = () => {
       <div className="card-body m-5">
         <h2>Here is a list of matchups you can vote on:</h2>
         <ul className="square">
-          {matchupList.map((matchup) => {
+          {matchups.map((matchup) => {
             return (
               <li key={matchup._id}>
                 <Link to={{ pathname: `/matchup/${matchup._id}` }}>
